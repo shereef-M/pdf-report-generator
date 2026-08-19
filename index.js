@@ -12,9 +12,26 @@ app.use(express.json());
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
-
 app.post("/reports", async (req, res) => {
   const db = new DatabaseSync("report.db");
+  const force = req.body?.force === true;
+
+  if (!force) {
+    const today = new Date().toISOString().split("T")[0];
+    const existing = db
+      .prepare(
+        "SELECT * FROM reports WHERE created_at LIKE ? ORDER BY id DESC LIMIT 1",
+      )
+      .get(`${today}%`);
+
+    if (existing) {
+      db.close();
+      return res.status(200).json({
+        id: existing.id,
+        file: `/reports/${existing.id}/file`,
+      });
+    }
+  }
 
   // Insert a placeholder row first, to get the auto-generated id
   const insertPlaceholder = db.prepare(
