@@ -21,6 +21,13 @@ db.exec(`
     url TEXT
   )
 `);
+db.exec(`
+  CREATE TABLE IF NOT EXISTS reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    path TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  )
+`);
 
 // Delete all existing rows first, so running this twice doesn't double the data
 db.exec("DELETE FROM books");
